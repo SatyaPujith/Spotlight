@@ -1,3 +1,5 @@
+import { Business } from '../types';
+
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
 export interface AuthUser {
@@ -10,21 +12,6 @@ export interface AuthUser {
 export interface AuthResponse {
   user: AuthUser;
   token: string;
-}
-
-export interface Business {
-  id: string;
-  name: string;
-  category: string;
-  price: string;
-  rating: number;
-  reviewCount: number;
-  address: string;
-  hours: string;
-  tags: string[];
-  whyThisPlace: string;
-  highlight: string;
-  imageUrl: string;
 }
 
 // Get stored token
