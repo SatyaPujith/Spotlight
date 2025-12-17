@@ -11,9 +11,9 @@ import {
   removeSavedBusinessForUser,
   getUserSavedBusinesses,
   verifyToken
-} from './services/database.js';
+} from './database.js';
 
-dotenv.config({ path: '.env.local' });
+dotenv.config();
 
 const app = express();
 app.use(cors());

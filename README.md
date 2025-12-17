@@ -140,30 +140,43 @@ Smart geographic handling:
    ```
 
 2. **Install dependencies**
+   
+   Frontend:
    ```bash
    npm install
    ```
-
-3. **Configure environment**
    
-   Create `.env.local` in the project root:
+   Backend:
+   ```bash
+   cd server
+   npm install
+   cd ..
+   ```
+
+3. **Configure environment variables**
+   
+   Create `.env` in the project root:
    ```env
-   # Yelp AI API Configuration
+   VITE_API_URL=http://localhost:3001
    YELP_AI_API_KEY=your_yelp_ai_api_key
    YELP_CLIENT_ID=your_yelp_client_id
+   ```
    
-   # Database Configuration
+   Create `server/.env` in the server folder:
+   ```env
+   YELP_AI_API_KEY=your_yelp_ai_api_key
+   YELP_CLIENT_ID=your_yelp_client_id
    MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/spotlight
-   
-   # Security
    JWT_SECRET=your_secure_jwt_secret_key
+   PORT=3001
    ```
 
 4. **Start development servers**
    
    Terminal 1 - Backend:
    ```bash
-   npm run server:dev
+   cd server
+   npm run dev
    ```
    
    Terminal 2 - Frontend:
@@ -173,7 +186,7 @@ Smart geographic handling:
 
 5. **Access the application**
    - Frontend: `http://localhost:3000`
-   - API: `http://localhost:3001`
+   - Backend API: `http://localhost:3001`
 
 ---
 
@@ -286,22 +299,30 @@ Authorization: Bearer <token>
 
 ```
 spotlight/
+├── server/                     # Backend (Node.js + Express)
+│   ├── index.js               # Express server with Yelp AI API
+│   ├── database.js            # MongoDB operations
+│   ├── package.json           # Backend dependencies
+│   └── .env                   # Backend environment variables
+│
 ├── components/                 # React components
 │   ├── IntelligencePanel.tsx  # Business display panel
 │   └── MessageBubble.tsx      # Chat message component
-├── services/                   # Service layer
+│
+├── services/                   # Frontend services
 │   ├── yelpAIService.ts       # Yelp AI API integration
-│   ├── authService.ts         # Authentication service
-│   └── database.js            # MongoDB operations
-├── App.tsx                     # Main application component
+│   └── authService.ts         # Authentication service
+│
+├── App.tsx                     # Main React application
 ├── types.ts                    # TypeScript definitions
-├── server.js                   # Express backend server
 ├── index.html                  # HTML entry point
 ├── index.tsx                   # React entry point
 ├── index.css                   # Global styles
 ├── vite.config.ts             # Vite configuration
+├── vite-env.d.ts              # Vite type declarations
 ├── tsconfig.json              # TypeScript configuration
-└── package.json               # Dependencies and scripts
+├── package.json               # Frontend dependencies
+└── .env                        # Frontend environment variables
 ```
 
 ---
@@ -310,6 +331,14 @@ spotlight/
 
 ### Environment Variables
 
+#### Frontend (`.env`)
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `VITE_API_URL` | Backend API URL | Yes |
+| `YELP_AI_API_KEY` | Yelp AI API key (fallback) | No |
+| `YELP_CLIENT_ID` | Yelp client ID | No |
+
+#### Backend (`server/.env`)
 | Variable | Description | Required |
 |----------|-------------|----------|
 | `YELP_AI_API_KEY` | Yelp AI API authentication key | Yes |
@@ -368,38 +397,63 @@ spotlight/
 
 ## Deployment
 
-### Production Build
+### Deploy to Render
 
+#### Step 1: Push to GitHub
 ```bash
-# Build frontend
-npm run build
-
-# Start production server
-npm run server
+git add .
+git commit -m "Ready for deployment"
+git push origin main
 ```
 
-### Docker Deployment
+#### Step 2: Deploy Backend (Web Service)
+1. Go to [render.com](https://render.com) and create a **Web Service**
+2. Connect your GitHub repository
+3. Configure:
+   - **Name**: `spotlight-backend`
+   - **Root Directory**: `server`
+   - **Build Command**: `npm install`
+   - **Start Command**: `npm start`
+4. Add environment variables:
+   ```
+   YELP_AI_API_KEY=your_key
+   YELP_CLIENT_ID=your_client_id
+   MONGODB_URI=your_mongodb_uri
+   JWT_SECRET=your_jwt_secret
+   PORT=3001
+   ```
+5. Deploy and copy your backend URL (e.g., `https://spotlight-backend.onrender.com`)
 
-```dockerfile
-FROM node:18-alpine
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci --only=production
-COPY . .
-RUN npm run build
-EXPOSE 3001
-CMD ["npm", "run", "server"]
-```
+#### Step 3: Deploy Frontend (Static Site)
+1. Create a **Static Site** on Render
+2. Connect the same GitHub repository
+3. Configure:
+   - **Name**: `spotlight-frontend`
+   - **Root Directory**: (leave empty)
+   - **Build Command**: `npm install && npm run build`
+   - **Publish Directory**: `dist`
+4. Add environment variable:
+   ```
+   VITE_API_URL=https://spotlight-backend.onrender.com
+   ```
+   (Use your actual backend URL from Step 2)
+5. Deploy!
 
-### Environment Recommendations
+#### Step 4: Configure MongoDB
+1. Go to MongoDB Atlas → Network Access
+2. Add IP Address: `0.0.0.0/0` (Allow from anywhere)
+
+Your app is now live! 🎉
+
+### Alternative Platforms
 
 | Platform | Frontend | Backend |
 |----------|----------|---------|
-| Vercel | ✅ Recommended | - |
-| Netlify | ✅ Supported | - |
-| Railway | - | ✅ Recommended |
-| Heroku | - | ✅ Supported |
-| AWS | ✅ S3 + CloudFront | ✅ EC2/ECS |
+| Render | ✅ Static Site | ✅ Web Service |
+| Vercel | ✅ Recommended | ❌ Not supported |
+| Netlify | ✅ Supported | ❌ Not supported |
+| Railway | ✅ Supported | ✅ Recommended |
+| Heroku | ❌ Not ideal | ✅ Supported |
 
 ---
 
